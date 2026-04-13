@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ONEIRA — Night 01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ═══════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════ */
+:root {
+  --night:   #080e18;
+  --night2:  #0d1520;
+  --cobalt:  #1E3A8A;
+  --violet:  #6D28D9;
+  --vs:      #8B5CF6;
+  --cream:   #F9F8F5;
+  --cream60: rgba(249,248,245,0.6);
+  --cream30: rgba(249,248,245,0.3);
+  --cream12: rgba(249,248,245,0.12);
+  --cream06: rgba(249,248,245,0.06);
+  --vglow:   rgba(139,92,246,0.15);
+  --vglow2:  rgba(109,40,217,0.08);
+  --border:  rgba(249,248,245,0.1);
+  --ease:    cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--night);
+  color: var(--cream);
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════
+   BACKGROUND CANVAS
+═══════════════════════════════════════ */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════
+   GRAIN OVERLAY
+═══════════════════════════════════════ */
+body::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.4;
+  animation: grainShift 8s steps(10) infinite;
+}
+
+@keyframes grainShift {
+  0%,100% { transform: translate(0,0); }
+  10% { transform: translate(-2%,-3%); }
+  20% { transform: translate(3%,1%); }
+  30% { transform: translate(-1%,4%); }
+  40% { transform: translate(2%,-2%); }
+  50% { transform: translate(-3%,2%); }
+  60% { transform: translate(1%,-1%); }
+  70% { transform: translate(-2%,3%); }
+  80% { transform: translate(3%,-3%); }
+  90% { transform: translate(-1%,1%); }
+}
+
+/* ═══════════════════════════════════════
+   SCREENS
+═══════════════════════════════════════ */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: env(safe-area-inset-top, 32px) 28px env(safe-area-inset-bottom, 32px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s var(--ease);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ═══════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════ */
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slowFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes sigilRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes breathPulse {
+  0%, 100% { transform: scale(1);    opacity: 0.5; }
+  50%       { transform: scale(1.09); opacity: 1;   }
+}
+
+@keyframes breathText {
+  0%, 100% { opacity: 0.4; content: 'inspirez'; }
+  25%       { opacity: 1;   }
+  75%       { opacity: 0.6; }
+}
+
+@keyframes starFloat {
+  0%, 100% { transform: translateY(0)   opacity: 0.4; }
+  50%       { transform: translateY(-6px); opacity: 0.9; }
+}
+
+/* ═══════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════ */
+.btn-primary {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: transparent;
+  border: 1px solid rgba(139,92,246,0.5);
+  padding: 18px 44px;
+  cursor: pointer;
+  transition: all 0.4s var(--ease);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--vglow);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease);
+}
+
+.btn-primary:hover::before { transform: scaleX(1); }
+.btn-primary:hover { border-color: var(--vs); }
+.btn-primary span { position: relative; z-index: 1; }
+
+.btn-primary:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-primary:disabled::before { display: none; }
+
+.btn-ghost {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--cream30);
+  background: none;
+  border: 1px solid var(--border);
+  padding: 14px 28px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-ghost:hover { border-color: rgba(139,92,246,0.4); color: var(--cream); }
+
+/* ═══════════════════════════════════════
+   SCREEN 1 — COVER
+═══════════════════════════════════════ */
+#s-cover {
+  text-align: center;
+  background: radial-gradient(ellipse at 50% 30%, rgba(109,40,217,0.12) 0%, transparent 65%);
+}
+
+.cover-sigil {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 44px;
+  animation: sigilRotate 24s linear infinite;
+}
+
+.cover-sigil svg { width: 100%; height: 100%; }
+
+.cover-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.45em;
+  color: var(--vs);
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  opacity: 0;
+  animation: riseIn 1s var(--ease) 0.3s forwards;
+}
+
+.cover-h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(52px, 13vw, 96px);
+  font-weight: 300;
+  line-height: 0.88;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+  opacity: 0;
+  animation: riseIn 1.2s var(--ease) 0.55s forwards;
+}
+
+.cover-h1 em { font-style: italic; color: var(--vs); }
+
+.cover-night-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.35em;
+  color: var(--cream30);
+  text-transform: uppercase;
+  margin-bottom: 44px;
+  opacity: 0;
+  animation: riseIn 1s var(--ease) 0.8s forwards;
+}
+
+.cover-tagline {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 17px;
+  color: var(--cream60);
+  max-width: 320px;
+  line-height: 1.7;
+  margin: 0 auto 56px;
+  opacity: 0;
+  animation: riseIn 1s var(--ease) 1s forwards;
+}
+
+.cover-cta-wrap {
+  opacity: 0;
+  animation: riseIn 1s var(--ease) 1.3s forwards;
+}
+
+.cover-free-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.25em;
+  color: var(--cream30);
+  margin-top: 18px;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 2 — ONBOARDING
+═══════════════════════════════════════ */
+#s-onboarding {
+  text-align: center;
+  max-width: 460px;
+  margin: 0 auto;
+  justify-content: flex-start;
+  padding-top: 52px;
+  padding-bottom: 40px;
+}
+
+.ob-step-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  color: var(--vs);
+  margin-bottom: 40px;
+}
+
+.ob-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(28px, 6vw, 38px);
+  font-weight: 300;
+  line-height: 1.2;
+  margin-bottom: 28px;
+}
+
+.ob-body {
+  font-size: 14.5px;
+  line-height: 1.9;
+  color: var(--cream60);
+  margin-bottom: 48px;
+}
+
+.ob-body strong { color: var(--cream); font-weight: 400; }
+
+.ob-schema {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 52px;
+}
+
+.ob-schema-item {
+  flex: 1;
+  max-width: 140px;
+  text-align: center;
+  position: relative;
+}
+
+.ob-schema-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 28px;
+  background: var(--border);
+}
+
+.ob-schema-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.3em;
+  color: var(--vs);
+  margin-bottom: 6px;
+}
+
+.ob-schema-action {
+  font-size: 13px;
+  color: var(--cream60);
+  line-height: 1.4;
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 3 — QUESTION
+═══════════════════════════════════════ */
+#s-question {
+  justify-content: flex-start;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+  padding-top: 52px;
+  padding-bottom: 40px;
+}
+
+.q-header {
+  text-align: center;
+  margin-bottom: 44px;
+}
+
+.q-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  color: var(--vs);
+  margin-bottom: 16px;
+}
+
+.q-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(28px, 6vw, 40px);
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+.q-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.35em;
+  color: var(--cream30);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.q-textarea {
+  width: 100%;
+  background: var(--cream06);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 20px 22px;
+  color: var(--cream);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-style: italic;
+  line-height: 1.55;
+  resize: none;
+  min-height: 120px;
+  transition: border-color 0.3s, background 0.3s;
+  margin-bottom: 10px;
+}
+
+.q-textarea::placeholder {
+  color: rgba(249,248,245,0.2);
+}
+
+.q-textarea:focus {
+  outline: none;
+  border-color: rgba(139,92,246,0.45);
+  background: rgba(139,92,246,0.04);
+}
+
+.q-hint {
+  font-size: 12.5px;
+  color: var(--cream30);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.q-example {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: rgba(139,92,246,0.5);
+  margin-bottom: 40px;
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 4 — RITUEL
+═══════════════════════════════════════ */
+#s-ritual {
+  text-align: center;
+  max-width: 440px;
+  margin: 0 auto;
+  justify-content: flex-start;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.ritual-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  color: var(--vs);
+  margin-bottom: 16px;
+}
+
+/* Breathing visual */
+.breath-container {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  margin: 0 auto 24px;
+  flex-shrink: 0;
+}
+
+.breath-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(139,92,246,0.2);
+}
+
+.breath-ring-1 { inset: 0;    animation: breathPulse 8s ease-in-out infinite; }
+.breath-ring-2 { inset: 18px; animation: breathPulse 8s ease-in-out infinite 0.6s; }
+
+.breath-core {
+  position: absolute;
+  inset: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(109,40,217,0.28) 0%, rgba(109,40,217,0.06) 65%, transparent 100%);
+  animation: breathPulse 8s ease-in-out infinite 1.2s;
+}
+
+.breath-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--cream60);
+  animation: slowFadeIn 2s ease forwards;
+}
+
+.ritual-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(20px, 4vw, 26px);
+  font-weight: 300;
+  margin-bottom: 8px;
+  line-height: 1.25;
+}
+
+.ritual-sub {
+  font-size: 13px;
+  color: var(--cream60);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.script-box {
+  background: linear-gradient(135deg, rgba(109,40,217,0.1), rgba(30,58,138,0.07));
+  border: 1px solid rgba(139,92,246,0.18);
+  border-radius: 2px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: slowFadeIn 2s ease 0.8s forwards;
+  width: 100%;
+}
+
+.script-box::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--vs), transparent);
+}
+
+.script-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--cream);
+  font-weight: 300;
+  text-align: left;
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 5 — SOMMEIL
+═══════════════════════════════════════ */
+#s-sleep {
+  text-align: center;
+  max-width: 380px;
+  margin: 0 auto;
+  padding-top: 52px;
+  padding-bottom: 40px;
+}
+
+.sleep-sigil {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 44px;
+  opacity: 0.35;
+}
+
+.sleep-h {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(32px, 8vw, 52px);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.1;
+  margin-bottom: 20px;
+  color: var(--cream60);
+}
+
+.sleep-body {
+  font-size: 14px;
+  color: var(--cream30);
+  line-height: 1.85;
+  margin-bottom: 60px;
+}
+
+.sleep-divider {
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(to bottom, rgba(139,92,246,0.4), transparent);
+  margin: 0 auto 60px;
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 6 — CAPTURE
+═══════════════════════════════════════ */
+#s-capture {
+  justify-content: flex-start;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+  padding-top: 52px;
+  padding-bottom: 40px;
+}
+
+.capture-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.cap-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  color: var(--vs);
+  margin-bottom: 14px;
+}
+
+.cap-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(26px, 5vw, 36px);
+  font-weight: 300;
+  line-height: 1.25;
+}
+
+.c-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--vs);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.c-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, rgba(139,92,246,0.3), transparent);
+}
+
+.capture-ta {
+  width: 100%;
+  background: var(--cream06);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 18px 20px;
+  color: var(--cream);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+  line-height: 1.7;
+  resize: vertical;
+  min-height: 130px;
+  transition: border-color 0.3s, background 0.3s;
+  margin-bottom: 20px;
+}
+
+.capture-ta::placeholder {
+  color: rgba(249,248,245,0.18);
+  font-style: italic;
+}
+
+.capture-ta:focus {
+  outline: none;
+  border-color: rgba(139,92,246,0.38);
+  background: rgba(139,92,246,0.04);
+}
+
+.tags-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.3em;
+  color: var(--cream30);
+  margin-bottom: 10px;
+}
+
+.tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 36px;
+}
+
+.sym-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  color: var(--cream30);
+}
+
+.sym-tag:hover { border-color: rgba(139,92,246,0.5); color: var(--cream60); }
+.sym-tag.selected {
+  border-color: var(--vs);
+  color: var(--vs);
+  background: rgba(139,92,246,0.08);
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 7 — RECALL SCORE
+═══════════════════════════════════════ */
+#s-recall {
+  text-align: center;
+  max-width: 440px;
+  margin: 0 auto;
+  width: 100%;
+  justify-content: flex-start;
+  padding-top: 52px;
+  padding-bottom: 40px;
+}
+
+.recall-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  color: var(--vs);
+  margin-bottom: 16px;
+}
+
+.recall-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(26px, 5vw, 36px);
+  font-weight: 300;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.recall-sub {
+  font-size: 13.5px;
+  color: var(--cream30);
+  margin-bottom: 48px;
+}
+
+.recall-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.recall-btn {
+  flex: 1;
+  max-width: 72px;
+  padding: 14px 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.recall-btn:hover { border-color: rgba(139,92,246,0.4); }
+
+.recall-btn.sel {
+  border-color: var(--vs);
+  background: rgba(139,92,246,0.1);
+}
+
+.recall-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  color: var(--cream60);
+  line-height: 1;
+}
+
+.recall-btn.sel .recall-num { color: var(--vs); }
+
+.recall-word {
+  font-family: 'DM Mono', monospace;
+  font-size: 7px;
+  letter-spacing: 0.12em;
+  color: var(--cream30);
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 8 — RÉFLEXION
+═══════════════════════════════════════ */
+#s-reflect {
+  justify-content: flex-start;
+  max-width: 460px;
+  margin: 0 auto;
+  width: 100%;
+  padding-top: 52px;
+  padding-bottom: 40px;
+}
+
+.reflect-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.reflect-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  color: var(--vs);
+  margin-bottom: 18px;
+}
+
+.reflect-q {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(20px, 4.5vw, 28px);
+  font-weight: 300;
+  line-height: 1.45;
+  color: var(--cream);
+}
+
+.reflect-ta {
+  width: 100%;
+  background: var(--cream06);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 18px 20px;
+  color: var(--cream);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+  line-height: 1.7;
+  resize: none;
+  min-height: 110px;
+  transition: border-color 0.3s, background 0.3s;
+  margin-bottom: 40px;
+}
+
+.reflect-ta::placeholder {
+  color: rgba(249,248,245,0.18);
+  font-style: italic;
+}
+
+.reflect-ta:focus {
+  outline: none;
+  border-color: rgba(139,92,246,0.38);
+  background: rgba(139,92,246,0.04);
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 9 — SYNTHÈSE + CONVERSION
+═══════════════════════════════════════ */
+#s-synthesis {
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
+  padding-top: 52px;
+  padding-bottom: 80px;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.syn-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  color: var(--vs);
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.syn-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(30px, 6vw, 44px);
+  font-weight: 300;
+  line-height: 1.1;
+  margin-bottom: 36px;
+  text-align: center;
+}
+
+/* Trace card */
+.trace-card {
+  background: linear-gradient(135deg, rgba(109,40,217,0.1), rgba(30,58,138,0.07));
+  border: 1px solid rgba(139,92,246,0.2);
+  border-radius: 2px;
+  padding: 22px 20px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: visible;
+}
+
+.trace-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(139,92,246,0.4), transparent);
+}
+
+.trace-row {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.trace-item-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.35em;
+  color: var(--vs);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.trace-item-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 17px;
+  color: var(--cream);
+  line-height: 1.5;
+}
+
+.trace-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.trace-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  padding: 5px 12px;
+  border: 1px solid rgba(139,92,246,0.35);
+  border-radius: 100px;
+  color: var(--vs);
+  background: rgba(139,92,246,0.06);
+}
+
+.trace-score-display {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.trace-score-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 38px;
+  font-weight: 300;
+  color: var(--vs);
+  line-height: 1;
+}
+
+.trace-score-label {
+  font-size: 13px;
+  color: var(--cream60);
+}
+
+/* Phrase de valeur */
+.syn-value-phrase {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 17px;
+  color: var(--cream60);
+  line-height: 1.75;
+  text-align: center;
+  margin-bottom: 36px;
+  padding: 0 8px;
+}
+
+/* Comparatif */
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.compare-col {
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 22px 18px;
+}
+
+.compare-col.premium {
+  border-color: rgba(139,92,246,0.35);
+  background: rgba(139,92,246,0.06);
+}
+
+.compare-col-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.3em;
+  color: var(--cream30);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: block;
+}
+
+.compare-col.premium .compare-col-label { color: var(--vs); }
+
+.compare-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compare-list li {
+  font-size: 12.5px;
+  color: var(--cream60);
+  line-height: 1.4;
+  padding-left: 14px;
+  position: relative;
+}
+
+.compare-list li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--cream30);
+  font-size: 10px;
+}
+
+.compare-col.premium .compare-list li { color: var(--cream); }
+.compare-col.premium .compare-list li::before { color: var(--vs); content: '→'; }
+
+/* CTA zone */
+.syn-cta-zone {
+  text-align: center;
+}
+
+.syn-cta-phrase {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--cream30);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.btn-convert {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--night);
+  background: var(--vs);
+  border: none;
+  padding: 20px 36px;
+  cursor: pointer;
+  transition: all 0.4s var(--ease);
+  width: 100%;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-convert::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.1);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease);
+}
+
+.btn-convert:hover::before { transform: scaleX(1); }
+.btn-convert span { position: relative; z-index: 1; }
+
+.btn-restart {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--cream30);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  transition: color 0.3s;
+  width: 100%;
+}
+
+.btn-restart:hover { color: var(--cream); }
+
+/* ═══════════════════════════════════════
+   PROGRESS INDICATOR
+═══════════════════════════════════════ */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 1px;
+  background: var(--vs);
+  transition: width 0.8s var(--ease);
+  z-index: 100;
+  opacity: 0;
+}
+
+.progress-bar.visible { opacity: 0.6; }
+
+/* Step counter */
+.step-counter {
+  position: fixed;
+  top: env(safe-area-inset-top, 18px);
+  right: 24px;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.3em;
+  color: var(--cream30);
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.6s;
+}
+
+.step-counter.visible { opacity: 1; }
+
+/* ═══════════════════════════════════════
+   UTILITY
+═══════════════════════════════════════ */
+.mt-auto { margin-top: auto; }
+.w-full  { width: 100%; }
+.text-center { text-align: center; }
+
+.syn-future-hint {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: var(--vs);
+  line-height: 1.65;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(139,92,246,0.15);
+  opacity: 0.85;
+}
+
+/* ═══════════════════════════════════════
+   NIGHT TIMELINE (synthèse)
+═══════════════════════════════════════ */
+.night-timeline {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 32px;
+  padding: 22px 24px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.night-timeline::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(139,92,246,0.2), transparent);
+}
+
+.ntl-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.ntl-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: -50%;
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  z-index: 0;
+}
+
+.ntl-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(139,92,246,0.35);
+  background: rgba(139,92,246,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s;
+}
+
+.ntl-dot.done {
+  background: var(--vs);
+  border-color: var(--vs);
+  box-shadow: 0 0 12px rgba(139,92,246,0.4);
+}
+
+.ntl-dot-inner {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cream);
+  opacity: 0;
+}
+
+.ntl-dot.done .ntl-dot-inner { opacity: 1; }
+
+.ntl-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 7px;
+  letter-spacing: 0.15em;
+  color: var(--cream30);
+  text-align: center;
+}
+
+.ntl-item.done .ntl-label { color: var(--vs); }
+
+.ntl-caption {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.25em;
+  color: var(--cream30);
+  text-align: center;
+  margin-top: -4px;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 0;
+  grid-column: 1 / -1;
+}
+
+/* Recall insight */
+.recall-insight {
+  background: var(--cream06);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 18px 20px;
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
+.recall-insight-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.35em;
+  color: var(--vs);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.recall-insight-text {
+  font-size: 13.5px;
+  color: var(--cream60);
+  line-height: 1.75;
+  font-style: italic;
+  font-family: 'Cormorant Garamond', serif;
+}
+
+/* Mobile-first adjustments */
+@media (max-height: 700px) {
+  .cover-sigil { width: 52px; height: 52px; margin-bottom: 32px; }
+  .cover-tagline { margin-bottom: 40px; }
+  .breath-container { width: 140px; height: 140px; margin-bottom: 32px; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- Background canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- Progress bar -->
+<div class="progress-bar" id="progress-bar"></div>
+<div class="step-counter" id="step-counter"></div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 1 — COVER
+═══════════════════════════════════════ -->
+<section class="screen active" id="s-cover">
+
+  <div class="cover-sigil">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="40" cy="40" r="38" stroke="rgba(139,92,246,0.25)" stroke-width="0.8"/>
+      <circle cx="40" cy="40" r="28" stroke="rgba(139,92,246,0.15)" stroke-width="0.6"/>
+      <path d="M40 2 L40 78" stroke="rgba(139,92,246,0.12)" stroke-width="0.6"/>
+      <path d="M2 40 L78 40" stroke="rgba(139,92,246,0.12)" stroke-width="0.6"/>
+      <path d="M14.1 14.1 L65.9 65.9" stroke="rgba(139,92,246,0.1)" stroke-width="0.6"/>
+      <path d="M65.9 14.1 L14.1 65.9" stroke="rgba(139,92,246,0.1)" stroke-width="0.6"/>
+      <circle cx="40" cy="40" r="6" fill="none" stroke="rgba(139,92,246,0.6)" stroke-width="0.8"/>
+      <circle cx="40" cy="40" r="2" fill="rgba(139,92,246,0.8)"/>
+      <path d="M40 12 L43.5 22 L40 20 L36.5 22 Z" fill="rgba(139,92,246,0.4)"/>
+    </svg>
+  </div>
+
+  <div class="cover-eyebrow">Oneira · Expérience Gratuite</div>
+
+  <h1 class="cover-h1">
+    Night<br><em>01</em>
+  </h1>
+
+  <div class="cover-night-num">Une nuit · Une question · Un réveil</div>
+
+  <p class="cover-tagline">
+    Utilisez votre sommeil pour commencer à voir autrement.
+  </p>
+
+  <div class="cover-cta-wrap">
+    <button class="btn-primary" onclick="goTo('s-onboarding')">
+      <span>Commencer</span>
+    </button>
+    <p class="cover-free-label">Accès privé · Expérience offerte</p>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 2 — ONBOARDING
+═══════════════════════════════════════ -->
+<section class="screen" id="s-onboarding">
+
+  <div class="ob-step-label">01 / Cadrage</div>
+
+  <h2 class="ob-title">
+    Ce n'est pas<br>une méthode mystique.
+  </h2>
+
+  <p class="ob-body">
+    Pendant le sommeil, votre cerveau continue de traiter<br>
+    ce qui lui résiste à l'éveil.<br>
+    Cette expérience vous permet d'<strong>orienter ce processus</strong><br>
+    — et d'en observer la trace au matin.
+  </p>
+
+  <div class="ob-schema">
+    <div class="ob-schema-item">
+      <div class="ob-schema-time">Ce soir</div>
+      <div class="ob-schema-action">Question<br>+ rituel</div>
+    </div>
+    <div class="ob-schema-item">
+      <div class="ob-schema-time">Au réveil</div>
+      <div class="ob-schema-action">Capture<br>+ réflexion</div>
+    </div>
+  </div>
+
+  <button class="btn-primary" onclick="goTo('s-question')">
+    <span>Continuer</span>
+  </button>
+
+</section>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 3 — QUESTION
+═══════════════════════════════════════ -->
+<section class="screen" id="s-question">
+
+  <div class="q-header">
+    <div class="q-eyebrow">02 / Votre question</div>
+    <h2 class="q-title">Que voulez-vous<br>explorer cette nuit ?</h2>
+  </div>
+
+  <div class="q-label">Question d'incubation</div>
+  <textarea
+    class="q-textarea"
+    id="question-input"
+    placeholder="Écrivez votre question ici…"
+    rows="4"
+    oninput="onQuestionInput()"
+  ></textarea>
+
+  <p class="q-hint">Question ouverte · À la première personne · Sans réponse oui/non.</p>
+  <p class="q-example">ex : "Comment puis-je aborder la prochaine étape de ce projet avec plus de clarté ?"</p>
+
+  <button class="btn-primary w-full" id="btn-question" onclick="goTo('s-ritual')" disabled>
+    <span>Valider ma question</span>
+  </button>
+
+</section>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 4 — RITUEL
+═══════════════════════════════════════ -->
+<section class="screen" id="s-ritual">
+
+  <div class="ritual-eyebrow">03 / Rituel pré-sommeil</div>
+
+  <div class="breath-container">
+    <div class="breath-ring breath-ring-1"></div>
+    <div class="breath-ring breath-ring-2"></div>
+    <div class="breath-core"></div>
+    <div class="breath-label">respirez</div>
+  </div>
+
+  <h2 class="ritual-heading">Préparez votre esprit.</h2>
+
+  <p class="ritual-sub">
+    Lisez lentement ce qui suit.<br>
+    Laissez les mots se déposer.
+  </p>
+
+  <div class="script-box">
+    <p class="script-text">
+      "Cette nuit, je laisse mon esprit<br>
+      explorer librement cette question.<br><br>
+      Au réveil, je retiens ce qui remonte —<br>
+      fragments, images, sensations.<br><br>
+      Je fais confiance à ce qui émerge."
+    </p>
+  </div>
+
+  <button class="btn-primary" onclick="goTo('s-sleep')">
+    <span>Je suis prêt pour cette nuit</span>
+  </button>
+
+</section>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 5 — SOMMEIL
+═══════════════════════════════════════ -->
+<section class="screen" id="s-sleep">
+
+  <div class="sleep-sigil">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M24 4 C13 4 4 13 4 24 C4 35 13 44 24 44 C19 38 19 30 24 24 C29 18 29 10 24 4Z" fill="rgba(139,92,246,0.3)"/>
+    </svg>
+  </div>
+
+  <h2 class="sleep-h">Bonne nuit.</h2>
+
+  <p class="sleep-body">
+    Reposez votre téléphone.<br>
+    Laissez la nuit travailler.<br><br>
+    Revenez ici dès le réveil,<br>
+    avant de vous lever.
+  </p>
+
+  <div class="sleep-divider"></div>
+
+  <button class="btn-ghost" onclick="goTo('s-capture')">
+    <span>Passer à demain matin →</span>
+  </button>
+
+</section>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 6 — CAPTURE
+═══════════════════════════════════════ -->
+<section class="screen" id="s-capture">
+
+  <div class="capture-header">
+    <div class="cap-eyebrow">04 / Capture au réveil</div>
+    <h2 class="cap-title">Que reste-t-il<br>de cette nuit ?</h2>
+  </div>
+
+  <div class="c-label">Matériau brut</div>
+  <textarea
+    class="capture-ta w-full"
+    id="capture-input"
+    placeholder="Fragments, images, sensations, un mot, une scène, une couleur…"
+    rows="5"
+  ></textarea>
+
+  <div class="tags-label">Symboles présents — sélectionnez ce qui résonne</div>
+  <div class="tags-row" id="tags-row">
+    <button class="sym-tag" data-tag="Eau"     onclick="toggleTag(this)">Eau</button>
+    <button class="sym-tag" data-tag="Porte"   onclick="toggleTag(this)">Porte</button>
+    <button class="sym-tag" data-tag="Lumière" onclick="toggleTag(this)">Lumière</button>
+    <button class="sym-tag" data-tag="Animal"  onclick="toggleTag(this)">Animal</button>
+    <button class="sym-tag" data-tag="Maison"  onclick="toggleTag(this)">Maison</button>
+    <button class="sym-tag" data-tag="Chute"   onclick="toggleTag(this)">Chute</button>
+  </div>
+
+  <button class="btn-primary w-full" onclick="goTo('s-recall')">
+    <span>Continuer</span>
+  </button>
+
+</section>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 7 — RECALL SCORE
+═══════════════════════════════════════ -->
+<section class="screen" id="s-recall">
+
+  <div class="recall-eyebrow">05 / Dream Recall Score</div>
+  <h2 class="recall-title">Quel est votre<br>niveau de souvenir ?</h2>
+  <p class="recall-sub">Intuition immédiate — ne réfléchissez pas trop.</p>
+
+  <div class="recall-row" id="recall-row">
+    <button class="recall-btn" data-score="1" onclick="setRecall(this)">
+      <span class="recall-num">1</span>
+      <span class="recall-word">Aucun</span>
+    </button>
+    <button class="recall-btn" data-score="2" onclick="setRecall(this)">
+      <span class="recall-num">2</span>
+      <span class="recall-word">Fragments</span>
+    </button>
+    <button class="recall-btn" data-score="3" onclick="setRecall(this)">
+      <span class="recall-num">3</span>
+      <span class="recall-word">Partiel</span>
+    </button>
+    <button class="recall-btn" data-score="4" onclick="setRecall(this)">
+      <span class="recall-num">4</span>
+      <span class="recall-word">Clair</span>
+    </button>
+    <button class="recall-btn" data-score="5" onclick="setRecall(this)">
+      <span class="recall-num">5</span>
+      <span class="recall-word">Détaillé</span>
+    </button>
+  </div>
+
+  <button class="btn-primary w-full" id="btn-recall" onclick="goTo('s-reflect')" disabled>
+    <span>Continuer</span>
+  </button>
+
+</section>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 8 — RÉFLEXION
+═══════════════════════════════════════ -->
+<section class="screen" id="s-reflect">
+
+  <div class="reflect-header">
+    <div class="reflect-eyebrow">06 / Réflexion guidée</div>
+    <p class="reflect-q">
+      "Qu'est-ce qui semble faire écho<br>
+      à votre question dans ce<br>
+      que vous avez capturé ?"
+    </p>
+  </div>
+
+  <textarea
+    class="reflect-ta w-full"
+    id="reflect-input"
+    placeholder="Une piste, une intuition, une image qui revient…"
+    rows="4"
+  ></textarea>
+
+  <button class="btn-primary w-full" onclick="buildSynthesis()">
+    <span>Voir ma synthèse</span>
+  </button>
+
+</section>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 9 — SYNTHÈSE + CONVERSION
+═══════════════════════════════════════ -->
+<section class="screen" id="s-synthesis">
+
+  <div class="syn-eyebrow">Night 01 · Trace complète</div>
+  <h2 class="syn-title">Votre première<br><em>empreinte</em>.</h2>
+
+  <!-- Trace card (remplie dynamiquement) -->
+  <div class="trace-card" id="trace-card">
+    <div class="trace-row">
+
+      <div>
+        <div class="trace-item-label">Question</div>
+        <div class="trace-item-value" id="syn-question">—</div>
+      </div>
+
+      <div>
+        <div class="trace-item-label">Dream Recall Score</div>
+        <div class="trace-score-display">
+          <span class="trace-score-num" id="syn-score">—</span>
+          <span class="trace-score-label" id="syn-score-label"></span>
+        </div>
+        <div class="recall-insight" id="recall-insight">
+          <div class="recall-insight-label">Observation</div>
+          <p class="recall-insight-text" id="recall-insight-text"></p>
+        </div>
+        <p id="syn-future-hint" class="syn-future-hint" style="display:none;"></p>
+      </div>
+
+      <div id="syn-tags-row" style="display:none;">
+        <div class="trace-item-label">Symboles</div>
+        <div class="trace-tags-row" id="syn-tags"></div>
+      </div>
+
+      <div id="syn-notes-row" style="display:none;">
+        <div class="trace-item-label">Matériau capturé</div>
+        <div class="trace-item-value" id="syn-notes" style="font-size:14px; color:var(--cream60);"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <p class="syn-value-phrase">
+    En une nuit, vous avez déjà créé une première trace.<br>
+    <em>Sur 7 nuits, ONEIRA révèle les motifs, les répétitions<br>et les déplacements de votre imaginaire.</em>
+  </p>
+
+  <!-- Timeline 7 nuits -->
+  <div class="night-timeline">
+    <div class="ntl-item done">
+      <div class="ntl-dot done"><div class="ntl-dot-inner"></div></div>
+      <div class="ntl-label">N·01</div>
+    </div>
+    <div class="ntl-item">
+      <div class="ntl-dot"><div class="ntl-dot-inner"></div></div>
+      <div class="ntl-label">N·02</div>
+    </div>
+    <div class="ntl-item">
+      <div class="ntl-dot"><div class="ntl-dot-inner"></div></div>
+      <div class="ntl-label">N·03</div>
+    </div>
+    <div class="ntl-item">
+      <div class="ntl-dot"><div class="ntl-dot-inner"></div></div>
+      <div class="ntl-label">N·04</div>
+    </div>
+    <div class="ntl-item">
+      <div class="ntl-dot"><div class="ntl-dot-inner"></div></div>
+      <div class="ntl-label">N·05</div>
+    </div>
+    <div class="ntl-item">
+      <div class="ntl-dot"><div class="ntl-dot-inner"></div></div>
+      <div class="ntl-label">N·06</div>
+    </div>
+    <div class="ntl-item">
+      <div class="ntl-dot"><div class="ntl-dot-inner"></div></div>
+      <div class="ntl-label">N·07</div>
+    </div>
+  </div>
+
+  <!-- Comparatif -->
+  <div class="compare-grid">
+    <div class="compare-col">
+      <span class="compare-col-label">Cette nuit gratuite</span>
+      <ul class="compare-list">
+        <li>Lancer une question</li>
+        <li>Vivre le rituel</li>
+        <li>Capturer du matériau</li>
+        <li>Un premier écho</li>
+      </ul>
+    </div>
+    <div class="compare-col premium">
+      <span class="compare-col-label">7 nuits complètes</span>
+      <ul class="compare-list">
+        <li>Recall suivi nuit après nuit</li>
+        <li>Symboles qui reviennent — et ce qu'ils déplacent</li>
+        <li>Associations inattendues entre vos rêves</li>
+        <li>Constellation visuelle de vos symboles</li>
+        <li>Lecture finale de votre semaine</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="syn-cta-zone">
+    <p class="syn-cta-phrase">
+      Une nuit ouvre une porte.<br>Sept nuits révèlent une structure.
+    </p>
+    <button class="btn-convert" onclick="window.location.href = ONEIRA_URL">
+      <span>Continuer avec le protocole complet →</span>
+    </button>
+
+    <!-- Teaser Pattern Engine -->
+    <div style="
+      margin-top: 28px;
+      margin-bottom: 20px;
+      padding: 18px 20px;
+      border: 1px solid rgba(139,92,246,0.15);
+      border-left: 2px solid rgba(139,92,246,0.4);
+      border-radius: 2px;
+      text-align: left;
+    ">
+      <div style="
+        font-family: 'DM Mono', monospace;
+        font-size: 8px;
+        letter-spacing: 0.28em;
+        color: rgba(139,92,246,0.6);
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      ">En développement</div>
+      <p style="
+        font-family: 'Cormorant Garamond', serif;
+        font-style: italic;
+        font-size: 14px;
+        color: var(--cream60);
+        line-height: 1.75;
+      ">
+        Un module d'analyse des trajectoires oniriques est actuellement en phase de recherche.
+        Il permettra de lire les configurations cognitives qui émergent au fil des nuits.
+        Les participants de cette expérience seront informés en premier.
+      </p>
+    </div>
+
+    <button class="btn-restart" onclick="restartExperience()">
+      Recommencer cette nuit gratuite
+    </button>
+  </div>
+
+</section>
+
+<script>
+/* ═══════════════════════════════════════
+   CONFIG — modifier ici avant distribution
+═══════════════════════════════════════ */
+const ONEIRA_URL = 'https://oneiralab.framer.website/'; // ← Landing page ONEIRA
+
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+const SCREENS = [
+  's-cover',
+  's-onboarding',
+  's-question',
+  's-ritual',
+  's-sleep',
+  's-capture',
+  's-recall',
+  's-reflect',
+  's-synthesis'
+];
+
+let state = {
+  currentScreen: 's-cover',
+  question: '',
+  tags: [],
+  captureNotes: '',
+  recallScore: null,
+  recallLabel: '',
+  reflection: ''
+};
+
+/* ─── Navigation ─── */
+function goTo(screenId) {
+  // Save current fields
+  saveFields();
+
+  const from = document.getElementById(state.currentScreen);
+  const to   = document.getElementById(screenId);
+  if (!to) return;
+
+  from.classList.remove('active');
+  to.classList.add('active');
+  state.currentScreen = screenId;
+
+  updateProgress();
+  saveToStorage();
+}
+
+function updateProgress() {
+  const idx = SCREENS.indexOf(state.currentScreen);
+  const pct = idx <= 0 ? 0 : (idx / (SCREENS.length - 1)) * 100;
+
+  const bar     = document.getElementById('progress-bar');
+  const counter = document.getElementById('step-counter');
+
+  bar.style.width = pct + '%';
+
+  if (state.currentScreen === 's-cover') {
+    bar.classList.remove('visible');
+    counter.classList.remove('visible');
+  } else {
+    bar.classList.add('visible');
+    counter.classList.add('visible');
+    if (idx > 0 && idx < SCREENS.length - 1) {
+      counter.textContent = idx + ' / ' + (SCREENS.length - 2);
+    } else {
+      counter.textContent = '';
+    }
+  }
+}
+
+/* ─── Field persistence ─── */
+function saveFields() {
+  const qi  = document.getElementById('question-input');
+  const ci  = document.getElementById('capture-input');
+  const ri  = document.getElementById('reflect-input');
+  if (qi) state.question     = qi.value;
+  if (ci) state.captureNotes = ci.value;
+  if (ri) state.reflection   = ri.value;
+}
+
+function saveToStorage() {
+  try { localStorage.setItem('oneira_n01', JSON.stringify(state)); } catch(e) {}
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem('oneira_n01');
+    if (raw) {
+      const saved = JSON.parse(raw);
+      Object.assign(state, saved);
+
+      // ── Restore active screen visually ──
+      // Remove active from all, then apply to the saved currentScreen
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(state.currentScreen);
+      if (target) target.classList.add('active');
+
+      // Restore fields
+      const qi = document.getElementById('question-input');
+      const ci = document.getElementById('capture-input');
+      const ri = document.getElementById('reflect-input');
+      if (qi && state.question)     { qi.value = state.question;     onQuestionInput(); }
+      if (ci && state.captureNotes) ci.value = state.captureNotes;
+      if (ri && state.reflection)   ri.value = state.reflection;
+      // Restore tags
+      document.querySelectorAll('.sym-tag').forEach(btn => {
+        if (state.tags.includes(btn.dataset.tag)) btn.classList.add('selected');
+      });
+      // Restore recall
+      if (state.recallScore) {
+        document.querySelectorAll('.recall-btn').forEach(btn => {
+          if (parseInt(btn.dataset.score) === state.recallScore) {
+            btn.classList.add('sel');
+            document.getElementById('btn-recall').disabled = false;
+          }
+        });
+      }
+    }
+  } catch(e) {}
+}
+
+/* ─── Question screen ─── */
+function onQuestionInput() {
+  const qi  = document.getElementById('question-input');
+  const btn = document.getElementById('btn-question');
+  btn.disabled = qi.value.trim().length === 0;
+}
+
+/* ─── Tags ─── */
+function toggleTag(el) {
+  const tag = el.dataset.tag;
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) {
+    if (!state.tags.includes(tag)) state.tags.push(tag);
+  } else {
+    state.tags = state.tags.filter(t => t !== tag);
+  }
+}
+
+/* ─── Recall score ─── */
+const RECALL_LABELS = ['', 'Aucun', 'Fragments', 'Partiel', 'Clair', 'Détaillé'];
+
+function setRecall(btn) {
+  document.querySelectorAll('.recall-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  state.recallScore = parseInt(btn.dataset.score);
+  state.recallLabel = RECALL_LABELS[state.recallScore];
+  document.getElementById('btn-recall').disabled = false;
+}
+
+/* ─── Build synthesis ─── */
+const RECALL_INSIGHTS = [
+  '', // index 0 unused
+  "Un score de 1 est courant pour une première nuit. Le simple fait d'avoir formulé la question amorce le processus — le recall se développe avec la pratique.",
+  'Les fragments sont souvent les formes les plus honnêtes du matériau nocturne. Ce n\'est pas un manque : c\'est le premier signal.',
+  'Un souvenir partiel contient déjà de la structure. Ce qui revient spontanément est rarement anodin.',
+  'Un recall clair à la première nuit indique une bonne sensibilité au matériau onirique. Sur 7 nuits, cette clarté révèle des patterns.',
+  'Un souvenir détaillé dès la première nuit est rare. Le potentiel d\'exploration sur 7 nuits est ici particulièrement fort.'
+];
+
+function buildSynthesis() {
+  saveFields();
+
+  // Question
+  const qEl = document.getElementById('syn-question');
+  qEl.textContent = state.question || '—';
+
+  // Score
+  const sEl  = document.getElementById('syn-score');
+  const slEl = document.getElementById('syn-score-label');
+  sEl.textContent  = state.recallScore || '—';
+  slEl.textContent = state.recallLabel ? '· ' + state.recallLabel : '';
+
+  // Recall insight
+  const insightEl = document.getElementById('recall-insight-text');
+  if (state.recallScore && RECALL_INSIGHTS[state.recallScore]) {
+    insightEl.textContent = RECALL_INSIGHTS[state.recallScore];
+    document.getElementById('recall-insight').style.display = 'block';
+  } else {
+    document.getElementById('recall-insight').style.display = 'none';
+  }
+
+  // Phrase temporelle — pointe vers la progression 7 nuits
+  const FUTURE_HINTS = [
+    '',
+    'À partir de la nuit 3, même un recall de 1 commence à produire du signal.',
+    'À la nuit 3, les premiers patterns apparaissent. À la nuit 6, ils ont un sens.',
+    'Avec ce niveau de recall, les nuits 4 à 6 seront les plus fertiles du protocole.',
+    'Un recall clair dès la nuit 1 est rare. Les nuits suivantes vont aller loin.',
+    'Avec ce niveau, la constellation de la nuit 7 sera particulièrement lisible.'
+  ];
+  const futureEl = document.getElementById('syn-future-hint');
+  if (futureEl && state.recallScore && FUTURE_HINTS[state.recallScore]) {
+    futureEl.textContent = FUTURE_HINTS[state.recallScore];
+    futureEl.style.display = 'block';
+  }
+
+  // Tags
+  const tRowEl = document.getElementById('syn-tags-row');
+  const tEl    = document.getElementById('syn-tags');
+  if (state.tags.length > 0) {
+    tEl.innerHTML = '';
+    state.tags.forEach(t => {
+      const span = document.createElement('span');
+      span.className = 'trace-tag';
+      span.textContent = t;
+      tEl.appendChild(span);
+    });
+    tRowEl.style.display = 'block';
+  }
+
+  // Notes
+  const nRowEl = document.getElementById('syn-notes-row');
+  const nEl    = document.getElementById('syn-notes');
+  if (state.captureNotes.trim()) {
+    const excerpt = state.captureNotes.length > 160
+      ? state.captureNotes.slice(0, 157) + '…'
+      : state.captureNotes;
+    nEl.textContent = excerpt;
+    nRowEl.style.display = 'block';
+  }
+
+  goTo('s-synthesis');
+  saveToStorage();
+}
+
+/* ─── Restart ─── */
+function restartExperience() {
+  try { localStorage.removeItem('oneira_n01'); } catch(e) {}
+  state = {
+    currentScreen: 's-cover',
+    question: '',
+    tags: [],
+    captureNotes: '',
+    recallScore: null,
+    recallLabel: '',
+    reflection: ''
+  };
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-cover').classList.add('active');
+
+  // Reset inputs
+  ['question-input','capture-input','reflect-input'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.querySelectorAll('.sym-tag').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.recall-btn').forEach(b => b.classList.remove('sel'));
+  document.getElementById('btn-question').disabled = true;
+  document.getElementById('btn-recall').disabled   = true;
+  document.getElementById('syn-tags-row').style.display   = 'none';
+  document.getElementById('syn-notes-row').style.display  = 'none';
+  document.getElementById('recall-insight').style.display = 'none';
+  const fh = document.getElementById('syn-future-hint'); if (fh) fh.style.display = 'none';
+
+  updateProgress();
+}
+
+/* ═══════════════════════════════════════
+   BACKGROUND CANVAS — PARTICULES
+═══════════════════════════════════════ */
+(function initCanvas() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function createParticles() {
+    particles = [];
+    const count = Math.min(60, Math.floor(W * H / 14000));
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x:    Math.random() * W,
+        y:    Math.random() * H,
+        r:    Math.random() * 1.2 + 0.3,
+        a:    Math.random() * Math.PI * 2,
+        spd:  Math.random() * 0.008 + 0.003,
+        amp:  Math.random() * 30 + 10,
+        base: Math.random() * H,
+        op:   Math.random() * 0.35 + 0.05
+      });
+    }
+  }
+
+  let t = 0;
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Ambient radial gradient
+    const grad = ctx.createRadialGradient(W/2, H*0.38, 0, W/2, H*0.38, H*0.6);
+    grad.addColorStop(0, 'rgba(109,40,217,0.06)');
+    grad.addColorStop(0.5, 'rgba(30,58,138,0.03)');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Particles
+    t += 0.005;
+    particles.forEach(p => {
+      p.y = p.base + Math.sin(t + p.a) * p.amp;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(139,92,246,${p.op})`;
+      ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  createParticles();
+  draw();
+  window.addEventListener('resize', () => { resize(); createParticles(); });
+})();
+
+/* ═══════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
+loadFromStorage();
+updateProgress();
+
+</script>
+</body>
+</html>
