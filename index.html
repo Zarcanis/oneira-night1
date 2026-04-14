@@ -2017,15 +2017,20 @@ updateProgress();
 function sendFreemiumData() {
   saveFields(); // s'assurer que state est à jour
 
+  const dataStr = [
+    'SOURCE : ONEIRA — Nuit 01 Freemium',
+    '',
+    'Fragments du rêve : ' + (state.captureNotes || '(non rempli)'),
+    'Symboles cochés : '   + (state.tags.length ? state.tags.join(', ') : '(aucun)'),
+    'Réflexion : '         + (state.reflection  || '(non rempli)'),
+    'Dream Recall Score : '+ (state.recallScore ? state.recallScore + '/5 — ' + state.recallLabel : '(non rempli)'),
+  ].join('\n');
+
   const params = {
-    to_email:  'ales@oneira-lab.com',
-    source:    'ONEIRA — Nuit 01 Freemium',
-    date:      new Date().toLocaleDateString('fr-CH', { day: '2-digit', month: 'long', year: 'numeric' }),
-    question:  state.question   || '(non rempli)',
-    fragments: state.captureNotes || '(non rempli)',
-    reflection:state.reflection || '(non rempli)',
-    tags:      state.tags.length ? state.tags.join(', ') : '(aucun)',
-    recall:    state.recallScore ? state.recallScore + '/5 — ' + state.recallLabel : '(non rempli)',
+    user_email: 'freemium@oneira-lab.com',
+    question:   state.question || '(non rempli)',
+    data:       dataStr,
+    date:       new Date().toLocaleDateString('fr-CH', { day: '2-digit', month: 'long', year: 'numeric' }),
   };
 
   // Envoi silencieux — on redirige dans tous les cas
