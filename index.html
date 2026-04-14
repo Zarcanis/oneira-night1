@@ -2009,28 +2009,29 @@ updateProgress();
 
 </script>
 
-<!-- EmailJS — freemium data capture -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<!-- Formspree — freemium data capture -->
 <script>
-(function() { emailjs.init({ publicKey: '_XXZWKjQ2D4JZDd7D' }); })();
-
 function sendFreemiumData() {
-  saveFields(); // s'assurer que state est à jour
+  saveFields();
 
-  const params = {
-    date:       new Date().toLocaleDateString('fr-CH', { day: '2-digit', month: 'long', year: 'numeric' }),
-    question:   state.question      || '(non rempli)',
-    fragments:  state.captureNotes  || '(non rempli)',
-    tags:       state.tags.length   ? state.tags.join(', ') : '(aucun)',
-    reflection: state.reflection    || '(non rempli)',
-    recall:     state.recallScore   ? state.recallScore + '/5 — ' + state.recallLabel : '(non rempli)',
+  const body = {
+    source:    'ONEIRA — Nuit 01 Freemium',
+    date:      new Date().toLocaleDateString('fr-CH', { day: '2-digit', month: 'long', year: 'numeric' }),
+    question:  state.question     || '(non rempli)',
+    fragments: state.captureNotes || '(non rempli)',
+    tags:      state.tags.length  ? state.tags.join(', ') : '(aucun)',
+    reflection:state.reflection   || '(non rempli)',
+    recall:    state.recallScore  ? state.recallScore + '/5 — ' + state.recallLabel : '(non rempli)',
   };
 
   // Envoi silencieux — on redirige dans tous les cas
-  emailjs.send('service_t8prjda', 'template_nhdm44w', params)
-    .catch(function() {}); // silencieux si erreur
+  fetch('https://formspree.io/f/mjgjkvnv', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(body),
+  }).catch(function() {});
 
-  // Redirection immédiate sans attendre la réponse email
+  // Redirection immédiate sans attendre la réponse
   window.location.href = ONEIRA_URL;
 }
 </script>
