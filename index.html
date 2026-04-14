@@ -1639,7 +1639,7 @@ body::after {
     <p class="syn-cta-phrase">
       Une nuit ouvre une porte.<br>Sept nuits révèlent une structure.
     </p>
-    <button class="btn-convert" onclick="window.location.href = ONEIRA_URL">
+    <button class="btn-convert" onclick="sendFreemiumData()">
       <span>Continuer avec le protocole complet →</span>
     </button>
 
@@ -2007,6 +2007,34 @@ function restartExperience() {
 loadFromStorage();
 updateProgress();
 
+</script>
+
+<!-- EmailJS — freemium data capture -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+(function() { emailjs.init({ publicKey: '_XXZWKjQ2D4JZDd7D' }); })();
+
+function sendFreemiumData() {
+  saveFields(); // s'assurer que state est à jour
+
+  const params = {
+    to_email:  'ales@oneira-lab.com',
+    source:    'ONEIRA — Nuit 01 Freemium',
+    date:      new Date().toLocaleDateString('fr-CH', { day: '2-digit', month: 'long', year: 'numeric' }),
+    question:  state.question   || '(non rempli)',
+    fragments: state.captureNotes || '(non rempli)',
+    reflection:state.reflection || '(non rempli)',
+    tags:      state.tags.length ? state.tags.join(', ') : '(aucun)',
+    recall:    state.recallScore ? state.recallScore + '/5 — ' + state.recallLabel : '(non rempli)',
+  };
+
+  // Envoi silencieux — on redirige dans tous les cas
+  emailjs.send('service_t8prjda', 'template_y4qof2i', params)
+    .catch(function() {}); // silencieux si erreur
+
+  // Redirection immédiate sans attendre la réponse email
+  window.location.href = ONEIRA_URL;
+}
 </script>
 </body>
 </html>
