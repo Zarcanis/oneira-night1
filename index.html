@@ -2017,24 +2017,17 @@ updateProgress();
 function sendFreemiumData() {
   saveFields(); // s'assurer que state est à jour
 
-  const dataStr = [
-    'SOURCE : ONEIRA — Nuit 01 Freemium',
-    '',
-    'Fragments du rêve : ' + (state.captureNotes || '(non rempli)'),
-    'Symboles cochés : '   + (state.tags.length ? state.tags.join(', ') : '(aucun)'),
-    'Réflexion : '         + (state.reflection  || '(non rempli)'),
-    'Dream Recall Score : '+ (state.recallScore ? state.recallScore + '/5 — ' + state.recallLabel : '(non rempli)'),
-  ].join('\n');
-
   const params = {
-    user_email: 'freemium@oneira-lab.com',
-    question:   state.question || '(non rempli)',
-    data:       dataStr,
     date:       new Date().toLocaleDateString('fr-CH', { day: '2-digit', month: 'long', year: 'numeric' }),
+    question:   state.question      || '(non rempli)',
+    fragments:  state.captureNotes  || '(non rempli)',
+    tags:       state.tags.length   ? state.tags.join(', ') : '(aucun)',
+    reflection: state.reflection    || '(non rempli)',
+    recall:     state.recallScore   ? state.recallScore + '/5 — ' + state.recallLabel : '(non rempli)',
   };
 
   // Envoi silencieux — on redirige dans tous les cas
-  emailjs.send('service_t8prjda', 'template_y4qof2i', params)
+  emailjs.send('service_t8prjda', 'template_nhdm44w', params)
     .catch(function() {}); // silencieux si erreur
 
   // Redirection immédiate sans attendre la réponse email
