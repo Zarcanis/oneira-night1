@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-      <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-YCMK67MXSB"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-YCMK67MXSB');
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1263,6 +1254,33 @@ body::after {
   .breath-container { width: 140px; height: 140px; margin-bottom: 32px; }
 }
 
+
+/* ── Email gate ── */
+.email-gate { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.email-gate-input {
+  width: 100%;
+  background: rgba(249,248,245,0.05);
+  border: 1px solid rgba(249,248,245,0.12);
+  border-radius: 2px;
+  padding: 16px 20px;
+  color: var(--cream);
+  font-family: 'Jost', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  transition: border-color 0.3s;
+}
+.email-gate-input::placeholder { color: rgba(249,248,245,0.22); }
+.email-gate-input:focus { outline: none; border-color: rgba(139,92,246,0.45); }
+.email-gate-error {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: rgba(239,68,68,0.7);
+  text-transform: uppercase;
+  display: none;
+  margin-top: -4px;
+}
 </style>
 </head>
 <body>
@@ -1648,9 +1666,19 @@ body::after {
     <p class="syn-cta-phrase">
       Une nuit ouvre une porte.<br>Sept nuits révèlent une structure.
     </p>
-    <button class="btn-convert" onclick="sendFreemiumData()">
-      <span>Continuer avec le protocole complet →</span>
-    </button>
+    <div class="email-gate">
+      <input
+        type="email"
+        class="email-gate-input"
+        id="gate-email"
+        placeholder="votre@email.com"
+        autocomplete="email"
+      />
+      <span class="email-gate-error" id="gate-error">Entrez une adresse valide</span>
+      <button class="btn-convert" onclick="submitWithEmail()">
+        <span>Continuer avec le protocole complet →</span>
+      </button>
+    </div>
 
     <!-- Teaser Pattern Engine -->
     <div style="
@@ -2020,27 +2048,41 @@ updateProgress();
 
 <!-- Formspree — freemium data capture -->
 <script>
-function sendFreemiumData() {
+function submitWithEmail() {
+  const emailEl = document.getElementById('gate-email');
+  const errEl   = document.getElementById('gate-error');
+  const email   = emailEl ? emailEl.value.trim() : '';
+  if (!email || !email.includes('@') || !email.includes('.')) {
+    errEl.style.display = 'block';
+    emailEl.focus();
+    return;
+  }
+  errEl.style.display = 'none';
+  sendFreemiumData(email);
+}
+
+async function sendFreemiumData(userEmail) {
   saveFields();
 
   const body = {
-    source:    'ONEIRA — Nuit 01 Freemium',
-    date:      new Date().toLocaleDateString('fr-CH', { day: '2-digit', month: 'long', year: 'numeric' }),
-    question:  state.question     || '(non rempli)',
-    fragments: state.captureNotes || '(non rempli)',
-    tags:      state.tags.length  ? state.tags.join(', ') : '(aucun)',
-    reflection:state.reflection   || '(non rempli)',
-    recall:    state.recallScore  ? state.recallScore + '/5 — ' + state.recallLabel : '(non rempli)',
+    source:     'ONEIRA — Nuit 01 Freemium',
+    email:      userEmail || '(non fourni)',
+    date:       new Date().toLocaleDateString('fr-CH', { day: '2-digit', month: 'long', year: 'numeric' }),
+    question:   state.question     || '(non rempli)',
+    fragments:  state.captureNotes || '(non rempli)',
+    tags:       state.tags.length  ? state.tags.join(', ') : '(aucun)',
+    reflection: state.reflection   || '(non rempli)',
+    recall:     state.recallScore  ? state.recallScore + '/5 — ' + state.recallLabel : '(non rempli)',
   };
 
-  // Envoi silencieux — on redirige dans tous les cas
-  fetch('https://formspree.io/f/mjgjkvnv', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(body),
-  }).catch(function() {});
+  try {
+    await fetch('https://formspree.io/f/mjgjkvnv', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  } catch(e) {}
 
-  // Redirection immédiate sans attendre la réponse
   window.location.href = ONEIRA_URL;
 }
 </script>
