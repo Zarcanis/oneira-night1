@@ -1610,6 +1610,20 @@ body::after {
     </div>
   </div>
 
+  <p style="
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--cream60);
+    line-height: 1.85;
+    text-align: center;
+    margin-bottom: 28px;
+    padding: 0 8px;
+  ">
+    Une seule nuit révèle un fragment.<br><br>
+    Plusieurs nuits révèlent une structure.
+  </p>
+
   <p class="syn-value-phrase">
     En une nuit, vous avez déjà créé une première trace.<br>
     <em>Sur 7 nuits, ONEIRA révèle les motifs, les répétitions<br>et les déplacements de votre imaginaire.</em>
@@ -1646,47 +1660,48 @@ body::after {
       <div class="ntl-label">N·07</div>
     </div>
   </div>
+  <p style="
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.28em;
+    color: var(--vs);
+    text-align: center;
+    margin-top: 14px;
+    margin-bottom: 32px;
+    opacity: 0.8;
+  ">1 / 7 nuits</p>
 
   <!-- Comparatif -->
   <div class="compare-grid">
     <div class="compare-col">
       <span class="compare-col-label">Cette nuit gratuite</span>
       <ul class="compare-list">
-        <li>Lancer une question</li>
+        <li>Poser une question</li>
         <li>Vivre le rituel</li>
-        <li>Capturer du matériau</li>
-        <li>Un premier écho</li>
+        <li>Capturer le matériau du rêve</li>
+        <li>Observer un premier écho</li>
       </ul>
     </div>
     <div class="compare-col premium">
-      <span class="compare-col-label">7 nuits complètes</span>
+      <span class="compare-col-label">Expérience complète · 7 nuits</span>
       <ul class="compare-list">
         <li>Recall suivi nuit après nuit</li>
-        <li>Symboles qui reviennent - et ce qu'ils déplacent</li>
-        <li>Associations inattendues entre vos rêves</li>
-        <li>Constellation visuelle de vos symboles</li>
-        <li>Lecture finale de votre semaine</li>
+        <li>Affinage de votre question</li>
+        <li>Les symboles qui reviennent — et ce qu'ils déplacent</li>
+        <li>Des associations inattendues entre vos rêves</li>
+        <li>La constellation visuelle de votre imaginaire</li>
+        <li>Une lecture de la trajectoire de votre semaine</li>
       </ul>
     </div>
   </div>
 
   <div class="syn-cta-zone">
-    <p class="syn-cta-phrase">
-      Une nuit ouvre une porte.<br>Sept nuits révèlent une structure.
+    <p class="syn-cta-phrase" style="font-size:19px; color:var(--cream60); margin-bottom:36px; margin-top:8px; line-height:1.65; padding: 0 4px;">
+      Une nuit ouvre une porte.<br>La nuit 2 commence à répondre<br><em style="color:var(--cream30);">— ou à déplacer —</em><br>ce que tu viens de poser.
     </p>
-    <div class="email-gate">
-      <input
-        type="email"
-        class="email-gate-input"
-        id="gate-email"
-        placeholder="votre@email.com"
-        autocomplete="email"
-      />
-      <span class="email-gate-error" id="gate-error">Entrez une adresse valide</span>
-      <button class="btn-convert" onclick="submitWithEmail()">
-        <span>Continuer avec le protocole complet →</span>
-      </button>
-    </div>
+    <button class="btn-convert" id="btn-convert-main" onclick="handleConvertClick()">
+      <span id="btn-convert-label">Continuer l'expérience &nbsp;·&nbsp; Nuit 02 →</span>
+    </button>
 
     <!-- Teaser Pattern Engine -->
     <div style="
@@ -1705,7 +1720,7 @@ body::after {
         color: rgba(139,92,246,0.6);
         text-transform: uppercase;
         margin-bottom: 10px;
-      ">En développement</div>
+      ">Module de lecture en recherche</div>
       <p style="
         font-family: 'Cormorant Garamond', serif;
         font-style: italic;
@@ -2056,25 +2071,19 @@ updateProgress();
 
 <!-- Formspree — freemium data capture -->
 <script>
-function submitWithEmail() {
-  const emailEl = document.getElementById('gate-email');
-  const errEl   = document.getElementById('gate-error');
-  const email   = emailEl ? emailEl.value.trim() : '';
-  if (!email || !email.includes('@') || !email.includes('.')) {
-    errEl.style.display = 'block';
-    emailEl.focus();
-    return;
-  }
-  errEl.style.display = 'none';
-  sendFreemiumData(email);
+function handleConvertClick() {
+  const btn   = document.getElementById('btn-convert-main');
+  const label = document.getElementById('btn-convert-label');
+  if (btn) btn.style.opacity = '0.7';
+  if (label) label.textContent = 'Ouverture de Nuit 02…';
+  setTimeout(() => sendFreemiumData(), 900);
 }
 
-async function sendFreemiumData(userEmail) {
+async function sendFreemiumData() {
   saveFields();
 
   const body = {
     source:     'ONEIRA — Nuit 01 Freemium',
-    email:      userEmail || '(non fourni)',
     date:       new Date().toLocaleDateString('fr-CH', { day: '2-digit', month: 'long', year: 'numeric' }),
     question:   state.question     || '(non rempli)',
     fragments:  state.captureNotes || '(non rempli)',
