@@ -1773,6 +1773,18 @@ let state = {
 };
 
 /* ─── Navigation ─── */
+const SCREEN_LABELS = {
+  's-cover':      'cover',
+  's-onboarding': '01_cadrage',
+  's-question':   '02_question',
+  's-ritual':     '03_rituel',
+  's-sleep':      '04_sommeil',
+  's-capture':    '05_capture',
+  's-recall':     '06_recall_score',
+  's-reflect':    '07_reflexion',
+  's-synthesis':  '08_synthese',
+};
+
 function goTo(screenId) {
   // Save current fields
   saveFields();
@@ -1784,6 +1796,14 @@ function goTo(screenId) {
   from.classList.remove('active');
   to.classList.add('active');
   state.currentScreen = screenId;
+
+  // GA4 — suivi de progression
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'etape_franchie', {
+      event_category: 'freemium_n01',
+      event_label: SCREEN_LABELS[screenId] || screenId,
+    });
+  }
 
   updateProgress();
   saveToStorage();
@@ -1966,6 +1986,14 @@ function buildSynthesis() {
 
   goTo('s-synthesis');
   saveToStorage();
+
+  // GA4 — synthèse atteinte (indépendant du clic CTA)
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'synthese_affichee', {
+      event_category: 'freemium_n01',
+      recall_score: state.recallScore || 0,
+    });
+  }
 }
 
 /* ─── Restart ─── */
@@ -2076,6 +2104,14 @@ function handleConvertClick() {
   const label = document.getElementById('btn-convert-label');
   if (btn) btn.style.opacity = '0.7';
   if (label) label.textContent = 'Ouverture de Nuit 02…';
+
+  // GA4 — clic CTA final
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'clic_cta_nuit02', {
+      event_category: 'freemium_n01',
+    });
+  }
+
   setTimeout(() => sendFreemiumData(), 900);
 }
 
