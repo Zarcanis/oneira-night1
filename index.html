@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-   <!-- Google tag (gtag.js) -->
+<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-YCMK67MXSB"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -1263,31 +1263,60 @@ body::after {
 }
 
 
-/* ── Email gate ── */
-.email-gate { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
-.email-gate-input {
-  width: 100%;
-  background: rgba(249,248,245,0.05);
-  border: 1px solid rgba(249,248,245,0.12);
-  border-radius: 2px;
-  padding: 16px 20px;
-  color: var(--cream);
-  font-family: 'Jost', sans-serif;
-  font-size: 13px;
-  font-weight: 300;
-  letter-spacing: 0.04em;
-  transition: border-color 0.3s;
+/* ── Exemples cliquables ── */
+.q-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
 }
-.email-gate-input::placeholder { color: rgba(249,248,245,0.22); }
-.email-gate-input:focus { outline: none; border-color: rgba(139,92,246,0.45); }
-.email-gate-error {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px;
-  letter-spacing: 0.2em;
-  color: rgba(239,68,68,0.7);
-  text-transform: uppercase;
-  display: none;
-  margin-top: -4px;
+.q-example-chip {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--cream30);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 11px 16px;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.45;
+  transition: all 0.25s;
+  width: 100%;
+}
+.q-example-chip:hover {
+  border-color: rgba(139,92,246,0.4);
+  color: var(--cream60);
+  background: var(--cream06);
+}
+
+/* ── Exemples cliquables ── */
+.q-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.q-example-chip {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--cream30);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 11px 16px;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.45;
+  transition: all 0.25s;
+  width: 100%;
+}
+.q-example-chip:hover {
+  border-color: rgba(139,92,246,0.4);
+  color: var(--cream60);
+  background: var(--cream06);
 }
 </style>
 </head>
@@ -1395,7 +1424,12 @@ body::after {
   ></textarea>
 
   <p class="q-hint">Question ouverte · À la première personne · Sans réponse oui/non.</p>
-  <p class="q-example">ex : "Comment puis-je aborder la prochaine étape de ce projet avec plus de clarté ?"</p>
+
+  <div class="q-examples">
+    <button class="q-example-chip" onclick="prefillQuestion(this)">Comment avancer sur une décision que je repousse ?</button>
+    <button class="q-example-chip" onclick="prefillQuestion(this)">Pourquoi est-ce que je me sens bloqué en ce moment ?</button>
+    <button class="q-example-chip" onclick="prefillQuestion(this)">Quelle direction prendre pour mon projet ?</button>
+  </div>
 
   <button class="btn-primary w-full" id="btn-question" onclick="goTo('s-ritual')" disabled>
     <span>Valider ma question</span>
@@ -1610,20 +1644,6 @@ body::after {
     </div>
   </div>
 
-  <p style="
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 18px;
-    color: var(--cream60);
-    line-height: 1.85;
-    text-align: center;
-    margin-bottom: 28px;
-    padding: 0 8px;
-  ">
-    Une seule nuit révèle un fragment.<br><br>
-    Plusieurs nuits révèlent une structure.
-  </p>
-
   <p class="syn-value-phrase">
     En une nuit, vous avez déjà créé une première trace.<br>
     <em>Sur 7 nuits, ONEIRA révèle les motifs, les répétitions<br>et les déplacements de votre imaginaire.</em>
@@ -1660,47 +1680,36 @@ body::after {
       <div class="ntl-label">N·07</div>
     </div>
   </div>
-  <p style="
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.28em;
-    color: var(--vs);
-    text-align: center;
-    margin-top: 14px;
-    margin-bottom: 32px;
-    opacity: 0.8;
-  ">1 / 7 nuits</p>
 
   <!-- Comparatif -->
   <div class="compare-grid">
     <div class="compare-col">
       <span class="compare-col-label">Cette nuit gratuite</span>
       <ul class="compare-list">
-        <li>Poser une question</li>
+        <li>Lancer une question</li>
         <li>Vivre le rituel</li>
-        <li>Capturer le matériau du rêve</li>
-        <li>Observer un premier écho</li>
+        <li>Capturer du matériau</li>
+        <li>Un premier écho</li>
       </ul>
     </div>
     <div class="compare-col premium">
-      <span class="compare-col-label">Expérience complète · 7 nuits</span>
+      <span class="compare-col-label">7 nuits complètes</span>
       <ul class="compare-list">
         <li>Recall suivi nuit après nuit</li>
-        <li>Affinage de votre question</li>
-        <li>Les symboles qui reviennent — et ce qu'ils déplacent</li>
-        <li>Des associations inattendues entre vos rêves</li>
-        <li>La constellation visuelle de votre imaginaire</li>
-        <li>Une lecture de la trajectoire de votre semaine</li>
+        <li>Symboles qui reviennent - et ce qu'ils déplacent</li>
+        <li>Associations inattendues entre vos rêves</li>
+        <li>Constellation visuelle de vos symboles</li>
+        <li>Lecture finale de votre semaine</li>
       </ul>
     </div>
   </div>
 
   <div class="syn-cta-zone">
-    <p class="syn-cta-phrase" style="font-size:19px; color:var(--cream60); margin-bottom:36px; margin-top:8px; line-height:1.65; padding: 0 4px;">
-      Une nuit ouvre une porte.<br>La nuit 2 commence à répondre<br><em style="color:var(--cream30);">— ou à déplacer —</em><br>ce que tu viens de poser.
+    <p class="syn-cta-phrase">
+      Une nuit ouvre une porte.<br>Sept nuits révèlent une structure.
     </p>
     <button class="btn-convert" id="btn-convert-main" onclick="handleConvertClick()">
-      <span id="btn-convert-label">Continuer l'expérience &nbsp;·&nbsp; Nuit 02 →</span>
+      <span>Continuer avec le protocole complet →</span>
     </button>
 
     <!-- Teaser Pattern Engine -->
@@ -1720,7 +1729,7 @@ body::after {
         color: rgba(139,92,246,0.6);
         text-transform: uppercase;
         margin-bottom: 10px;
-      ">Module de lecture en recherche</div>
+      ">En développement</div>
       <p style="
         font-family: 'Cormorant Garamond', serif;
         font-style: italic;
@@ -1888,6 +1897,38 @@ function onQuestionInput() {
   const qi  = document.getElementById('question-input');
   const btn = document.getElementById('btn-question');
   btn.disabled = qi.value.trim().length === 0;
+}
+
+/* ─── Exemples pré-remplis ─── */
+function prefillQuestion(btn) {
+  const qi = document.getElementById('question-input');
+  if (!qi) return;
+  qi.value = btn.textContent.trim();
+  qi.focus();
+  onQuestionInput();
+
+  // GA4 — exemple cliqué
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'exemple_question_clique', {
+      event_category: 'freemium_n01',
+      event_label: btn.textContent.trim().slice(0, 50),
+    });
+  }
+}
+
+/* ─── Exemples pré-remplis ─── */
+function prefillQuestion(btn) {
+  const qi = document.getElementById('question-input');
+  if (!qi) return;
+  qi.value = btn.textContent.trim();
+  qi.focus();
+  onQuestionInput();
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'exemple_question_clique', {
+      event_category: 'freemium_n01',
+      event_label: btn.textContent.trim().slice(0, 50),
+    });
+  }
 }
 
 /* ─── Tags ─── */
