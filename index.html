@@ -1256,6 +1256,11 @@ body::after {
 }
 
 /* Mobile-first adjustments */
+@keyframes hintFloat {
+  0%,100% { transform: translateY(0); opacity: 0.4; }
+  50%      { transform: translateY(6px); opacity: 0.8; }
+}
+
 @media (max-height: 700px) {
   .cover-sigil { width: 52px; height: 52px; margin-bottom: 32px; }
   .cover-tagline { margin-bottom: 40px; }
@@ -1357,14 +1362,35 @@ body::after {
   <div class="cover-night-num">Une nuit · Une question · Un réveil</div>
 
   <p class="cover-tagline">
-    Utilisez votre sommeil pour commencer à voir autrement.
+    Ce soir, vous déposez une question.<br>
+    Demain matin,<br>
+    vous observez ce qui remonte.
   </p>
 
   <div class="cover-cta-wrap">
+    <p style="
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      color: var(--cream30);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    ">5 min ce soir · 2 min au réveil</p>
     <button class="btn-primary" onclick="goTo('s-onboarding')">
-      <span>Commencer</span>
+      <span>Commencer cette nuit</span>
     </button>
     <p class="cover-free-label">Accès privé · Expérience offerte</p>
+    <div style="
+      margin-top: 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      animation: hintFloat 2.2s ease-in-out infinite;
+    ">
+      <span style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.2em;color:var(--cream30);text-transform:uppercase;">défiler</span>
+      <span style="font-size:12px;color:var(--cream30);opacity:0.6;">↓</span>
+    </div>
   </div>
 
 </section>
@@ -1381,10 +1407,9 @@ body::after {
   </h2>
 
   <p class="ob-body">
-    Pendant le sommeil, votre cerveau continue de traiter<br>
-    ce qui lui résiste à l'éveil.<br>
-    Cette expérience vous permet d'<strong>orienter ce processus</strong><br>
-    - et d'en observer la trace au matin.
+    Votre cerveau travaille déjà la nuit.<br><br>
+    Cette expérience vous permet d'<strong>observer ce processus</strong><br>
+    et d'en lire la première trace dès demain matin.
   </p>
 
   <div class="ob-schema">
@@ -1513,6 +1538,14 @@ body::after {
   </div>
 
   <div class="c-label">Matériau brut</div>
+  <p style="
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--cream30);
+    line-height: 1.65;
+    margin-bottom: 12px;
+  ">Même un mot. Même une image. Même l'absence.</p>
   <textarea
     class="capture-ta w-full"
     id="capture-input"
